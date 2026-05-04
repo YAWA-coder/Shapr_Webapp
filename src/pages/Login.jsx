@@ -1,100 +1,75 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import { login, fetchProfile } from "../api/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [username, setUsername]         = useState("");
+  const [password, setPassword]         = useState("");
+  const [error, setError]               = useState("");
+  const [loading, setLoading]           = useState(false);
+  const navigate    = useNavigate();
+  const { setUser } = useAuth();
+
+  const handleLogin = async () => {
+    setError("");
+    if (!username || !password) { setError("Please fill in all fields."); return; }
+    setLoading(true);
+    try {
+      await login({ username, password });
+      const profile = await fetchProfile();
+      setUser(profile);
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Invalid username or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-page">
       <header className="login-topbar">
         <div className="login-brand">ShapR</div>
       </header>
-
       <main className="login-main">
         <section className="login-card">
           <div className="login-card-inner">
             <h1 className="login-title">ShapR</h1>
             <p className="login-subtitle">Welcome Back!</p>
 
-            <label className="login-label" htmlFor="email">
-              Email Address
-            </label>
+            {error && (
+              <div style={{ background:"#fee2e2", color:"#dc2626", padding:"10px 14px", borderRadius:"8px", marginBottom:"12px", fontSize:"14px" }}>
+                {error}
+              </div>
+            )}
+
+            <label className="login-label" htmlFor="username">Username</label>
             <div className="login-input-wrap">
-              <span className="login-input-icon" aria-hidden="true">
-                <MailIcon />
-              </span>
-              <input
-                id="email"
-                className="login-input"
-                placeholder="name@company.com"
-                type="email"
-              />
+              <input id="username" className="login-input" placeholder="your_username" type="text"
+                value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
 
-            <div className="login-row-between">
-              <label className="login-label" htmlFor="password">
-                Password
-              </label>
-              <button className="login-link" type="button">
-                Forgot Password?
-              </button>
-            </div>
-
+            <label className="login-label" htmlFor="password">Password</label>
             <div className="login-input-wrap">
-              <span className="login-input-icon" aria-hidden="true">
-                <LockIcon />
-              </span>
-              <input
-                id="password"
-                className="login-input"
-                placeholder="••••••••"
+              <input id="password" className="login-input" placeholder="••••••••"
                 type={showPassword ? "text" : "password"}
-              />
-              <button
-                className="login-pass-toggle"
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onClick={() => setShowPassword((v) => !v)}
-              >
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
+              <button className="login-pass-toggle" type="button" onClick={() => setShowPassword(v => !v)}>
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
 
-            <button
-              className="login-btn-primary"
-              type="button"
-              onClick={() => navigate("/dashboard")}
-            >
-              <span>Login to Dashboard</span>
-              <span className="login-primary-arrow" aria-hidden="true">
-                <ArrowIcon />
-              </span>
+            <button className="login-btn-primary" type="button" onClick={handleLogin} disabled={loading}>
+              <span>{loading ? "Logging in…" : "Login to Dashboard"}</span>
             </button>
-
-            <div className="login-divider">
-              <span>or continue with</span>
-            </div>
-
-            <div className="login-social">
-              <button className="login-btn-social" type="button">
-                <GoogleIcon />
-                <span>Google</span>
-              </button>
-              <button className="login-btn-social" type="button">
-                <FacebookIcon />
-                <span>Facebook</span>
-              </button>
-            </div>
 
             <p className="login-footer-text">
               Don&apos;t have an account?{" "}
-              <button
-                className="login-link login-footer-link"
-                type="button"
-                onClick={() => navigate("/signup")}
-              >
+              <button className="login-link login-footer-link" type="button" onClick={() => navigate("/signup")}>
                 Sign up for free
               </button>
             </p>
@@ -102,67 +77,5 @@ export default function Login() {
         </section>
       </main>
     </div>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="l-icon" aria-hidden="true">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="l-icon" aria-hidden="true">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="l-icon-sm" aria-hidden="true">
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="l-icon" aria-hidden="true">
-      <path
-        d="M21.6 12.2c0-.7-.1-1.2-.2-1.8H12v3.4h5.4c-.2 1-.9 2.5-2.5 3.5v2.2h3.1c1.8-1.6 2.6-4 2.6-6.3z"
-        fill="#4285F4"
-      />
-      <path
-        d="M12 22c2.6 0 4.8-.9 6.4-2.5l-3.1-2.2c-.9.6-2.1 1-3.3 1-2.5 0-4.6-1.7-5.4-4H3.4v2.3C5 19.9 8.2 22 12 22z"
-        fill="#34A853"
-      />
-      <path
-        d="M6.6 13.3c-.2-.6-.3-1.1-.3-1.7s.1-1.2.3-1.7V7.6H3.4C2.8 8.8 2.4 10.2 2.4 11.6s.4 2.8 1 4l3.2-2.3z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M12 5.9c1.4 0 2.6.5 3.5 1.4l2.6-2.5C16.8 3.4 14.6 2.4 12 2.4 8.2 2.4 5 4.5 3.4 7.6l3.2 2.3c.8-2.3 2.9-4 5.4-4z"
-        fill="#EA4335"
-      />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="l-icon" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" fill="#2F55A4" />
-      <path
-        d="M13.2 18v-5h1.7l.3-2h-2V9.7c0-.6.2-1 .9-1h1.2V6.9c-.2 0-.9-.1-1.8-.1-1.8 0-3 1.1-3 3.1V11H8.9v2h1.6v5h2.7z"
-        fill="#fff"
-      />
-    </svg>
   );
 }
