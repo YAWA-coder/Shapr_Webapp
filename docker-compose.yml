@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: shapr_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=True
+    command: python manage.py runserver 0.0.0.0:8000
+
+  webapp:
+    build: ./webapp
+    container_name: shapr_webapp
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./webapp:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+  mobile:
+    build: ./mobile
+    container_name: shapr_mobile
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./mobile:/app
+      - /app/node_modules
+    depends_on:
+      - backend

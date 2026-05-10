@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HistoryBlockComponent from "../components/History-Block_Component";
 import "../styles/History_View.css";
 import { useNightMode } from "../context/NightModeContext";
@@ -9,13 +9,15 @@ const TIME_FILTERS = ["All time", "This week", "This month", "This year"];
 
 export default function HistoryView() {
   const { nightMode } = useNightMode();
-  const { sessions } = useSession();
+  const { sessions, refreshSessions } = useSession();
 
   const [search, setSearch] = useState("");
   const [timeFilter, setTimeFilter] = useState("All time");
-  
-  // NEW: State to hold the data for the popup modal
-  const [selectedEntry, setSelectedEntry] = useState(null); 
+  const [selectedEntry, setSelectedEntry] = useState(null);
+
+  useEffect(() => {
+    refreshSessions();
+  }, [refreshSessions]);
 
   const filtered = sessions.filter((entry) => {
     const q = search.toLowerCase();
@@ -35,21 +37,30 @@ export default function HistoryView() {
       <h1 className="history-title">History</h1>
 
       <div className="history-card">
-        {/* Search + Filter Bar */}
         <div className="history-controls">
           <div className="search-wrapper">
             <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8" />
               <path d="M21 21l-4.35-4.35" />
             </svg>
-            <input type="text" placeholder="Search Subject, Task, or Mood..." value={search} onChange={(e) => setSearch(e.target.value)} className="search-input" />
+            <input
+              type="text"
+              placeholder="Search Subject, Task, or Mood..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input"
+            />
           </div>
 
           <div className="filter-wrapper">
             <svg className="filter-icon" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round">
               <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
             </svg>
-            <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} className="time-filter">
+            <select
+              value={timeFilter}
+              onChange={(e) => setTimeFilter(e.target.value)}
+              className="time-filter"
+            >
               {TIME_FILTERS.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
             <svg className="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="#7C5BD6" strokeWidth="2" strokeLinecap="round">
@@ -58,34 +69,34 @@ export default function HistoryView() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="table-wrapper">
           <table className="history-table">
             <thead>
               <tr className="table-header">
-                {COLUMNS.map((col) => <th key={col} className="table-header-cell">{col}</th>)}
+                {COLUMNS.map((col) => (
+                  <th key={col} className="table-header-cell">{col}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filtered.length > 0 ? (
                 [...filtered].reverse().map((entry, i) => (
-                  <HistoryBlockComponent 
-                    key={i} 
-                    entry={entry} 
-                    onView={() => setSelectedEntry(entry)} // Opens the modal!
+                  <HistoryBlockComponent
+                    key={i}
+                    entry={entry}
+                    onView={() => setSelectedEntry(entry)}
                   />
                 ))
               ) : (
-                <tr><td colSpan={6} className="empty-state">No history records found.</td></tr>
+                <tr>
+                  <td colSpan={6} className="empty-state">No history records found.</td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* THE DETAILS POPUP MODAL                      */}
-      {/* ========================================== */}
       {selectedEntry && (
         <div className="history-modal-overlay" onClick={() => setSelectedEntry(null)}>
           <div className="history-modal-content" onClick={e => e.stopPropagation()}>
@@ -103,11 +114,12 @@ export default function HistoryView() {
               <div className="detail-item"><span>Wellness Status</span><strong>{selectedEntry.mood} • {selectedEntry.sleep} hrs sleep</strong></div>
             </div>
 
-            <button className="history-close-btn" onClick={() => setSelectedEntry(null)}>Close Details</button>
+            <button className="history-close-btn" onClick={() => setSelectedEntry(null)}>
+              Close Details
+            </button>
           </div>
         </div>
       )}
-
     </div>
   );
 }

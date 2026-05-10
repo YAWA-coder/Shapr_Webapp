@@ -7,6 +7,10 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 
+const BASE_URL = Platform.OS === 'web'
+  ? 'http://localhost:8000'
+  : 'http://192.168.254.109:8000';
+
 export default function Signup() {
   const router = useRouter();
   const { colors } = useTheme();
@@ -24,7 +28,7 @@ export default function Signup() {
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.18.9:8000/api/user/register/", {
+      const response = await fetch(`${BASE_URL}/api/user/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -55,7 +59,6 @@ export default function Signup() {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}>
 
-        {/* BRAND */}
         <View style={{ alignItems: "center", marginBottom: 32 }}>
           <Text style={{
             fontSize: 40, fontWeight: "900",
@@ -69,7 +72,6 @@ export default function Signup() {
           </Text>
         </View>
 
-        {/* CARD */}
         <View style={{
           backgroundColor: colors.card,
           borderRadius: 20,
@@ -89,7 +91,6 @@ export default function Signup() {
             </View>
           )}
 
-          {/* USERNAME */}
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 }}>Username</Text>
           <View style={{
             flexDirection: "row", alignItems: "center", backgroundColor: inputBg,
@@ -105,7 +106,6 @@ export default function Signup() {
             />
           </View>
 
-          {/* EMAIL */}
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 }}>Email Address</Text>
           <View style={{
             flexDirection: "row", alignItems: "center", backgroundColor: inputBg,
@@ -121,7 +121,6 @@ export default function Signup() {
             />
           </View>
 
-          {/* PASSWORD */}
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 }}>Password</Text>
           <View style={{
             flexDirection: "row", alignItems: "center", backgroundColor: inputBg,
@@ -142,7 +141,6 @@ export default function Signup() {
             </Pressable>
           </View>
 
-          {/* BUTTON */}
           <Pressable
             onPress={handleSignup} disabled={loading}
             style={{

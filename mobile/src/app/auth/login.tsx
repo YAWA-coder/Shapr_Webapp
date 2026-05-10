@@ -8,6 +8,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/context/ThemeContext";
 
+const BASE_URL = Platform.OS === 'web'
+  ? 'http://localhost:8000'
+  : 'http://192.168.254.109:8000';
+
 export default function Login() {
   const router = useRouter();
   const { colors } = useTheme();
@@ -26,7 +30,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const response = await fetch("http://192.168.18.9:8000/api/user/login/", {
+      const response = await fetch(`${BASE_URL}/api/user/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ username, password }),
@@ -45,7 +49,6 @@ export default function Login() {
     }
   };
 
-  // Input background: web uses #f3f4f6 (light) / #16162a (dark)
   const inputBg = colors.card4 ?? (colors.background === "#f0edf8" ? "#f3f4f6" : "#16162a");
 
   return (
@@ -55,11 +58,10 @@ export default function Login() {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}>
 
-        {/* BRAND */}
         <View style={{ alignItems: "center", marginBottom: 32 }}>
           <Text style={{
             fontSize: 40, fontWeight: "900",
-            color: colors.brand,           // web: #6a0dad on login
+            color: colors.brand,
             letterSpacing: -1,
           }}>
             ShapR
@@ -69,7 +71,6 @@ export default function Login() {
           </Text>
         </View>
 
-        {/* CARD */}
         <View style={{
           backgroundColor: colors.card,
           borderRadius: 20,
@@ -94,7 +95,6 @@ export default function Login() {
             </View>
           )}
 
-          {/* USERNAME */}
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 }}>
             Username
           </Text>
@@ -125,7 +125,6 @@ export default function Login() {
             />
           </View>
 
-          {/* PASSWORD */}
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.text, marginBottom: 6 }}>
             Password
           </Text>
@@ -161,12 +160,11 @@ export default function Login() {
             </Pressable>
           </View>
 
-          {/* LOGIN BUTTON */}
           <Pressable
             onPress={handleLogin}
             disabled={loading}
             style={{
-              backgroundColor: colors.brand,   // web: #6a0dad on login btn
+              backgroundColor: colors.brand,
               padding: 16,
               borderRadius: 12,
               alignItems: "center",
@@ -194,7 +192,6 @@ export default function Login() {
           </Pressable>
         </View>
 
-        {/* SIGNUP LINK */}
         <View style={{ marginTop: 24, alignItems: "center" }}>
           <Text style={{ color: colors.textMuted, fontSize: 14 }}>
             Don't have an account?{" "}
