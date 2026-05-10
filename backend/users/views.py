@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework import generics, status
+
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -18,21 +19,6 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]  # 🔥 important
-
-    def create(self, request, *args, **kwargs):
-        # 1. Validate and save the new user
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-
-        # 2. Generate their token immediately
-        token, _ = Token.objects.get_or_create(user=user)
-
-        # 3. Return the exact same dictionary format as your login_view
-        return Response({
-            "token": token.key,
-            "username": user.username
-        }, status=status.HTTP_201_CREATED)
 
 
 # -------------------------
